@@ -13,18 +13,22 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
-            title: const Text('Scan QR code')),
-        body: MobileScanner(
-          onDetect: (cap) {
-            final v = cap.barcodes.map((b) => b.rawValue).whereType<String>().firstOrNull;
-            if (v == null || _done) return;
-            _done = true;
-            Navigator.pop(context, v);
-          },
-        ),
-      );
+    backgroundColor: Colors.black,
+    appBar: AppBar(
+      backgroundColor: Colors.black,
+      foregroundColor: Colors.white,
+      title: const Text('Scan QR code'),
+    ),
+    body: MobileScanner(
+      onDetect: (cap) {
+        final v = cap.barcodes
+            .map((b) => b.rawValue)
+            .whereType<String>()
+            .firstOrNull;
+        if (v == null || _done) return;
+        _done = true;
+        Navigator.pop(context, v);
+      },
+    ),
+  );
 }

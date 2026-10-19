@@ -23,21 +23,31 @@ Future<void> main() async {
   await Push.init();
   final info = await PackageInfo.fromPlatform();
   final link = await AppLinks().getInitialLink();
-  final start = (link == null ? null : mapDeepLink(link))?.toString() ??
-      (Push.initialUrl == null ? null : mapDeepLink(Uri.parse(Push.initialUrl!)))?.toString() ??
+  final start =
+      (link == null ? null : mapDeepLink(link))?.toString() ??
+      (Push.initialUrl == null
+              ? null
+              : mapDeepLink(Uri.parse(Push.initialUrl!)))
+          ?.toString() ??
       kStartUrl;
   runApp(SoftneticsApp(startUrl: start, version: info.version));
 }
 
 class SoftneticsApp extends StatelessWidget {
-  const SoftneticsApp({super.key, required this.startUrl, required this.version});
+  const SoftneticsApp({
+    super.key,
+    required this.startUrl,
+    required this.version,
+  });
   final String startUrl, version;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'Softnetics',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(useMaterial3: true, colorSchemeSeed: kGreen),
-        home: UpgradeAlert(child: WebShellScreen(startUrl: startUrl, version: version)),
-      );
+    title: 'Softnetics',
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(useMaterial3: true, colorSchemeSeed: kGreen),
+    home: UpgradeAlert(
+      child: WebShellScreen(startUrl: startUrl, version: version),
+    ),
+  );
 }

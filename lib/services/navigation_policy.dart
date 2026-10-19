@@ -32,4 +32,6 @@ bool isRootPath(String path) {
 }
 
 bool isResumablePath(String path) =>
-    path.startsWith('/app') || path.startsWith('/pro') || path.startsWith('/admin');
+    path.startsWith('/app') ||
+    path.startsWith('/pro') ||
+    path.startsWith('/admin');

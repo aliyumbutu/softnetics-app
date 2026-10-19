@@ -8,24 +8,29 @@ class ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ColoredBox(
-        color: Colors.white,
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Image.asset('assets/logo.png', width: 120),
-              const SizedBox(height: 32),
-              Text(message,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 18, color: Colors.black87)),
-              const SizedBox(height: 24),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: kGreen),
-                onPressed: onRetry,
-                child: const Text('Retry'),
-              ),
-            ]),
-          ),
+    color: Colors.white,
+    child: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/logo.png', width: 120),
+            const SizedBox(height: 32),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18, color: Colors.black87),
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: kGreen),
+              onPressed: onRetry,
+              child: const Text('Retry'),
+            ),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 }

@@ -48,8 +48,12 @@ class Push {
         title: n.title,
         body: n.body,
         notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails('default', 'Softnetics',
-              importance: Importance.high, icon: 'ic_stat_notification'),
+          android: AndroidNotificationDetails(
+            'default',
+            'Softnetics',
+            importance: Importance.high,
+            icon: 'ic_stat_notification',
+          ),
           iOS: DarwinNotificationDetails(),
         ),
         payload: x.data['url'] as String?,

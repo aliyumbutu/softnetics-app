@@ -24,13 +24,18 @@ import '../widgets/error_view.dart';
 import '../widgets/splash_overlay.dart';
 
 class WebShellScreen extends StatefulWidget {
-  const WebShellScreen({super.key, required this.startUrl, required this.version});
+  const WebShellScreen({
+    super.key,
+    required this.startUrl,
+    required this.version,
+  });
   final String startUrl, version;
   @override
   State<WebShellScreen> createState() => _WebShellScreenState();
 }
 
-class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObserver {
+class _WebShellScreenState extends State<WebShellScreen>
+    with WidgetsBindingObserver {
   InAppWebViewController? _web;
   late final PullToRefreshController _ptr = PullToRefreshController(
     settings: PullToRefreshSettings(color: kGreen),
@@ -42,7 +47,10 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
   Timer? _splashMax, _stall;
   DateTime? _pausedAt, _lastBack;
 
-  bool _splash = true, _firstLoadDone = false, _offline = false, _stalled = false;
+  bool _splash = true,
+      _firstLoadDone = false,
+      _offline = false,
+      _stalled = false;
   String? _error;
   double _progress = 0;
   bool _failedLast = false;
@@ -92,7 +100,8 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
       _unlock();
     }
     if (s == AppLifecycleState.resumed && _pausedAt != null) {
-      if (DateTime.now().difference(_pausedAt!) > const Duration(minutes: 30)) _web?.reload();
+      if (DateTime.now().difference(_pausedAt!) > const Duration(minutes: 30))
+        _web?.reload();
       _pausedAt = null;
     }
   }
@@ -170,7 +179,8 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
   // ---- permissions ------------------------------------------------------
 
   bool _trusted(Uri? o) =>
-      o != null && (o.host == kHost || o.host == 'daily.co' || o.host.endsWith('.daily.co'));
+      o != null &&
+      (o.host == kHost || o.host == 'daily.co' || o.host.endsWith('.daily.co'));
 
   Future<void> _settingsDialog(String what) async {
     if (!mounted) return;
@@ -178,10 +188,18 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
       context: context,
       builder: (c) => AlertDialog(
         title: Text('$what permission needed'),
-        content: Text('Softnetics needs $what access for this feature. Enable it in Settings.'),
+        content: Text(
+          'Softnetics needs $what access for this feature. Enable it in Settings.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Not now')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Open settings')),
+          TextButton(
+            onPressed: () => Navigator.pop(c, false),
+            child: const Text('Not now'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text('Open settings'),
+          ),
         ],
       ),
     );
@@ -195,23 +213,39 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
   }
 
   Future<GeolocationPermissionShowPromptResponse?> _geo(
-      InAppWebViewController c, String origin) async {
-    final ok = _trusted(Uri.tryParse(origin)) && await _ask(Permission.locationWhenInUse, 'location');
+    InAppWebViewController c,
+    String origin,
+  ) async {
+    final ok =
+        _trusted(Uri.tryParse(origin)) &&
+        await _ask(Permission.locationWhenInUse, 'location');
     if (ok && Platform.isAndroid) {
       // Boundary mapping needs precise location.
       final acc = await Permission.location.serviceStatus;
-      if (acc != ServiceStatus.enabled) _toast('Turn on location for accurate farm mapping');
+      if (acc != ServiceStatus.enabled)
+        _toast('Turn on location for accurate farm mapping');
     }
-    return GeolocationPermissionShowPromptResponse(origin: origin, allow: ok, retain: ok);
+    return GeolocationPermissionShowPromptResponse(
+      origin: origin,
+      allow: ok,
+      retain: ok,
+    );
   }
 
-  Future<PermissionResponse?> _perm(InAppWebViewController c, PermissionRequest r) async {
+  Future<PermissionResponse?> _perm(
+    InAppWebViewController c,
+    PermissionRequest r,
+  ) async {
     if (!_trusted(Uri.tryParse(r.origin.toString()))) {
-      return PermissionResponse(resources: r.resources, action: PermissionResponseAction.DENY);
+      return PermissionResponse(
+        resources: r.resources,
+        action: PermissionResponseAction.DENY,
+      );
     }
     final granted = <PermissionResourceType>[];
     for (final res in r.resources) {
-      if (res == PermissionResourceType.CAMERA && await _ask(Permission.camera, 'camera')) {
+      if (res == PermissionResourceType.CAMERA &&
+          await _ask(Permission.camera, 'camera')) {
         granted.add(res);
       } else if (res == PermissionResourceType.MICROPHONE &&
           await _ask(Permission.microphone, 'microphone')) {
@@ -224,7 +258,9 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
     }
     return PermissionResponse(
       resources: granted,
-      action: granted.isEmpty ? PermissionResponseAction.DENY : PermissionResponseAction.GRANT,
+      action: granted.isEmpty
+          ? PermissionResponseAction.DENY
+          : PermissionResponseAction.GRANT,
     );
   }
 
@@ -244,7 +280,9 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
       if (widget.startUrl == kStartUrl && path == '/' && last != null) {
         c.loadUrl(urlRequest: URLRequest(url: WebUri('https://$kHost$last')));
       }
-      final wait = const Duration(milliseconds: 1200) - DateTime.now().difference(_launch);
+      final wait =
+          const Duration(milliseconds: 1200) -
+          DateTime.now().difference(_launch);
       Timer(wait.isNegative ? Duration.zero : wait, _hideSplash);
     }
     if (host == kHost) {
@@ -261,14 +299,17 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
     final phone = MediaQuery.of(context).size.shortestSide < 600;
     final lock = phone && !path.startsWith('/admin');
     SystemChrome.setPreferredOrientations(
-        lock ? [DeviceOrientation.portraitUp] : DeviceOrientation.values);
+      lock ? [DeviceOrientation.portraitUp] : DeviceOrientation.values,
+    );
   }
 
   Future<void> _onBack() async {
     final c = _web;
     if (c != null) {
       final r = await c.evaluateJavascript(
-          source: 'typeof window.SoftneticsBack === "function" ? window.SoftneticsBack() : false');
+        source:
+            'typeof window.SoftneticsBack === "function" ? window.SoftneticsBack() : false',
+      );
       if (r == true) return;
       final path = (await c.getUrl())?.path ?? '/';
       if (!isRootPath(path) && await c.canGoBack()) {
@@ -277,7 +318,8 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
       }
     }
     final now = DateTime.now();
-    if (_lastBack != null && now.difference(_lastBack!) < const Duration(seconds: 2)) {
+    if (_lastBack != null &&
+        now.difference(_lastBack!) < const Duration(seconds: 2)) {
       SystemNavigator.pop();
     } else {
       _lastBack = now;
@@ -316,7 +358,8 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
       allowFileAccessFromFileURLs: false,
       allowUniversalAccessFromFileURLs: false,
       textZoom: 100,
-      applicationNameForUserAgent: 'SoftneticsApp/${widget.version} ($_platform)',
+      applicationNameForUserAgent:
+          'SoftneticsApp/${widget.version} ($_platform)',
       isInspectable: kDebugMode,
       limitsNavigationsToAppBoundDomains: Platform.isIOS,
       transparentBackground: false,
@@ -332,169 +375,220 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
         child: Scaffold(
           backgroundColor: Colors.white,
           resizeToAvoidBottomInset: true,
-          body: Stack(children: [
-            // Built immediately, hidden under the splash, so the page loads while the logo shows.
-            Positioned.fill(
-              child: SafeArea(
-                top: false,
-                child: InAppWebView(
-                  initialUrlRequest: URLRequest(url: WebUri(widget.startUrl)),
-                  initialSettings: settings,
-                  initialUserScripts: UnmodifiableListView([
-                    UserScript(
-                        source: bridgeScript,
-                        injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
-                        forMainFrameOnly: false)
-                  ]),
-                  pullToRefreshController: _ptr,
-                  onWebViewCreated: (c) {
-                    _web = c;
-                    registerBridge(
-                      c,
-                      BridgeHooks(
-                        version: widget.version,
-                        platform: _platform,
-                        setPullToRefresh: (on) => _ptr.setEnabled(on),
-                        saveFile: (n, b) => saveBase64(context, n, b),
+          body: Stack(
+            children: [
+              // Built immediately, hidden under the splash, so the page loads while the logo shows.
+              Positioned.fill(
+                child: Column(
+                  children: [
+                    if (_authPage)
+                      Material(
+                        color: Colors.white,
+                        child: SafeArea(
+                          bottom: false,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              style: TextButton.styleFrom(
+                                foregroundColor: kGreen,
+                              ),
+                              icon: const Icon(Icons.arrow_back, size: 20),
+                              label: const Text('Back to home'),
+                              onPressed: () => _web?.loadUrl(
+                                urlRequest: URLRequest(url: WebUri(kStartUrl)),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    );
-                    registerPhase2Bridge(c, () async {
-                      if (!await _ask(Permission.camera, 'camera')) return null;
-                      if (!mounted) return null;
-                      return Navigator.push<String>(
-                          context, MaterialPageRoute(builder: (_) => const ScannerScreen()));
-                    });
-                  },
-                  onLoadStart: (c, u) {
-                    _stall?.cancel();
-                    _stall = Timer(const Duration(seconds: 20), () {
-                      if (mounted && _error == null) setState(() => _stalled = true);
-                    });
-                    if (_error != null) setState(() => _error = null);
-                  },
-                  onLoadStop: _onStop,
-                  onUpdateVisitedHistory: (c, u, _) {
-                    final auth = u?.host == kHost &&
-                        (u!.path == '/login' || u.path == '/register');
-                    if (auth != _authPage && mounted) setState(() => _authPage = auth);
-                  },
-                  onProgressChanged: (c, p) {
-                    if (mounted) setState(() => _progress = p / 100);
-                    if (p == 100) _ptr.endRefreshing();
-                  },
-                  shouldOverrideUrlLoading: (c, a) async {
-                    if (!a.isForMainFrame) return NavigationActionPolicy.ALLOW;
-                    final u = a.request.url;
-                    if (u == null) return NavigationActionPolicy.CANCEL;
-                    final act = decide(u);
-                    if (act == NavAction.webview) return NavigationActionPolicy.ALLOW;
-                    if (act == NavAction.download) return NavigationActionPolicy.ALLOW;
-                    _route(u);
-                    return NavigationActionPolicy.CANCEL;
-                  },
-                  onCreateWindow: (c, a) async {
-                    final u = a.request.url;
-                    if (u != null) _route(u);
-                    return true; // never open a native popup window
-                  },
-                  onDownloadStartRequest: (c, r) =>
-                      downloadUrl(context, r.url, r.suggestedFilename ?? r.url.pathSegments.last, _ua),
-                  onGeolocationPermissionsShowPrompt: _geo,
-                  onPermissionRequest: _perm,
-                  onReceivedError: (c, r, e) {
-                    if (r.isForMainFrame != true) return;
-                    if (e.type == WebResourceErrorType.CANCELLED) return;
-                    _fail(_offline ? "You're offline" : "Couldn't load the page. Check your connection.");
-                  },
-                  onReceivedHttpError: (c, r, res) {
-                    final code = res.statusCode ?? 0;
-                    if (r.isForMainFrame == true && code >= 500 && code < 600) {
-                      _fail('Something went wrong, try again');
-                    }
-                  },
-                  onReceivedServerTrustAuthRequest: (c, ch) async =>
-                      ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.CANCEL),
-                  onRenderProcessGone: (c, d) => c.reload(),
-                  onWebContentProcessDidTerminate: (c) => c.reload(),
+                    Expanded(
+                      child: SafeArea(
+                        top: false,
+                        child: InAppWebView(
+                          initialUrlRequest: URLRequest(
+                            url: WebUri(widget.startUrl),
+                          ),
+                          initialSettings: settings,
+                          initialUserScripts: UnmodifiableListView([
+                            UserScript(
+                              source: bridgeScript,
+                              injectionTime:
+                                  UserScriptInjectionTime.AT_DOCUMENT_START,
+                              forMainFrameOnly: false,
+                            ),
+                          ]),
+                          pullToRefreshController: _ptr,
+                          onWebViewCreated: (c) {
+                            _web = c;
+                            registerBridge(
+                              c,
+                              BridgeHooks(
+                                version: widget.version,
+                                platform: _platform,
+                                setPullToRefresh: (on) => _ptr.setEnabled(on),
+                                saveFile: (n, b) => saveBase64(context, n, b),
+                              ),
+                            );
+                            registerPhase2Bridge(c, () async {
+                              if (!await _ask(Permission.camera, 'camera'))
+                                return null;
+                              if (!mounted) return null;
+                              return Navigator.push<String>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ScannerScreen(),
+                                ),
+                              );
+                            });
+                          },
+                          onLoadStart: (c, u) {
+                            _stall?.cancel();
+                            _stall = Timer(const Duration(seconds: 20), () {
+                              if (mounted && _error == null)
+                                setState(() => _stalled = true);
+                            });
+                            if (_error != null) setState(() => _error = null);
+                          },
+                          onLoadStop: _onStop,
+                          onUpdateVisitedHistory: (c, u, _) {
+                            final auth =
+                                u?.host == kHost &&
+                                (u!.path == '/login' || u.path == '/register');
+                            if (auth != _authPage && mounted)
+                              setState(() => _authPage = auth);
+                          },
+                          onProgressChanged: (c, p) {
+                            if (mounted) setState(() => _progress = p / 100);
+                            if (p == 100) _ptr.endRefreshing();
+                          },
+                          shouldOverrideUrlLoading: (c, a) async {
+                            if (!a.isForMainFrame)
+                              return NavigationActionPolicy.ALLOW;
+                            final u = a.request.url;
+                            if (u == null) return NavigationActionPolicy.CANCEL;
+                            final act = decide(u);
+                            if (act == NavAction.webview)
+                              return NavigationActionPolicy.ALLOW;
+                            if (act == NavAction.download)
+                              return NavigationActionPolicy.ALLOW;
+                            _route(u);
+                            return NavigationActionPolicy.CANCEL;
+                          },
+                          onCreateWindow: (c, a) async {
+                            final u = a.request.url;
+                            if (u != null) _route(u);
+                            return true; // never open a native popup window
+                          },
+                          onDownloadStartRequest: (c, r) => downloadUrl(
+                            context,
+                            r.url,
+                            r.suggestedFilename ?? r.url.pathSegments.last,
+                            _ua,
+                          ),
+                          onGeolocationPermissionsShowPrompt: _geo,
+                          onPermissionRequest: _perm,
+                          onReceivedError: (c, r, e) {
+                            if (r.isForMainFrame != true) return;
+                            if (e.type == WebResourceErrorType.CANCELLED)
+                              return;
+                            _fail(
+                              _offline
+                                  ? "You're offline"
+                                  : "Couldn't load the page. Check your connection.",
+                            );
+                          },
+                          onReceivedHttpError: (c, r, res) {
+                            final code = res.statusCode ?? 0;
+                            if (r.isForMainFrame == true &&
+                                code >= 500 &&
+                                code < 600) {
+                              _fail('Something went wrong, try again');
+                            }
+                          },
+                          onReceivedServerTrustAuthRequest: (c, ch) async =>
+                              ServerTrustAuthResponse(
+                                action: ServerTrustAuthResponseAction.CANCEL,
+                              ),
+                          onRenderProcessGone: (c, d) => c.reload(),
+                          onWebContentProcessDidTerminate: (c) => c.reload(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            if (_progress < 1 && !_splash)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: SafeArea(
-                  bottom: false,
-                  child: LinearProgressIndicator(
-                      value: _progress, minHeight: 2, color: kGreen, backgroundColor: Colors.transparent),
-                ),
-              ),
-            if (_offline && _error == null)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Material(
-                  color: Colors.black87,
+              if (_progress < 1 && !_splash)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
                   child: SafeArea(
                     bottom: false,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 6),
-                      child: Text("You're offline",
-                          textAlign: TextAlign.center, style: TextStyle(color: Colors.white)),
+                    child: LinearProgressIndicator(
+                      value: _progress,
+                      minHeight: 2,
+                      color: kGreen,
+                      backgroundColor: Colors.transparent,
                     ),
                   ),
                 ),
-              ),
-            if (_stalled && _error == null)
-              Positioned(
-                bottom: 24,
-                left: 24,
-                right: 24,
-                child: Material(
-                  elevation: 4,
-                  borderRadius: BorderRadius.circular(8),
-                  child: ListTile(
-                    title: const Text('Taking longer than usual'),
-                    trailing: TextButton(onPressed: _retry, child: const Text('Retry')),
-                  ),
-                ),
-              ),
-            if (_authPage && !_splash && _error == null)
-              Positioned(
-                left: 16,
-                right: 16,
-                bottom: 16 + MediaQuery.of(context).padding.bottom,
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: kGreen,
-                    side: const BorderSide(color: kGreen),
-                    minimumSize: const Size.fromHeight(48),
-                  ),
-                  icon: const Icon(Icons.home_outlined),
-                  label: const Text('Back to home'),
-                  onPressed: () =>
-                      _web?.loadUrl(urlRequest: URLRequest(url: WebUri(kStartUrl))),
-                ),
-              ),
-            if (_error != null) Positioned.fill(child: ErrorView(message: _error!, onRetry: _retry)),
-            if (_locked)
-              Positioned.fill(
-                child: ColoredBox(
-                  color: Colors.white,
-                  child: Center(
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(backgroundColor: kGreen),
-                      onPressed: _unlock,
-                      child: const Text('Unlock'),
+              if (_offline && _error == null)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Material(
+                    color: Colors.black87,
+                    child: SafeArea(
+                      bottom: false,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 6),
+                        child: Text(
+                          "You're offline",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            if (_splash) const Positioned.fill(child: SplashOverlay()),
-          ]),
+              if (_stalled && _error == null)
+                Positioned(
+                  bottom: 24,
+                  left: 24,
+                  right: 24,
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(8),
+                    child: ListTile(
+                      title: const Text('Taking longer than usual'),
+                      trailing: TextButton(
+                        onPressed: _retry,
+                        child: const Text('Retry'),
+                      ),
+                    ),
+                  ),
+                ),
+              if (_error != null)
+                Positioned.fill(
+                  child: ErrorView(message: _error!, onRetry: _retry),
+                ),
+              if (_locked)
+                Positioned.fill(
+                  child: ColoredBox(
+                    color: Colors.white,
+                    child: Center(
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(backgroundColor: kGreen),
+                        onPressed: _unlock,
+                        child: const Text('Unlock'),
+                      ),
+                    ),
+                  ),
+                ),
+              if (_splash) const Positioned.fill(child: SplashOverlay()),
+            ],
+          ),
         ),
       ),
     );
@@ -506,7 +600,11 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
 Uri? mapDeepLink(Uri u) {
   if (u.scheme == 'https' && u.host == kHost) return u;
   if (u.scheme == kScheme && u.host != 'paystack') {
-    return Uri.https(kHost, '/${u.host}${u.path}', u.hasQuery ? u.queryParameters : null);
+    return Uri.https(
+      kHost,
+      '/${u.host}${u.path}',
+      u.hasQuery ? u.queryParameters : null,
+    );
   }
   return null;
 }
