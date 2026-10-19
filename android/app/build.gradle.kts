@@ -11,6 +11,7 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -39,6 +40,15 @@ android {
     }
 }
 
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+}
+
 flutter {
     source = "../.."
+}
+
+// Firebase push: enabled only once google-services.json is added (see README_PHASE2.md).
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }

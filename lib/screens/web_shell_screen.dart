@@ -12,7 +12,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config.dart';
+import '../services/app_lock.dart';
 import '../services/bridge.dart';
+import '../services/push.dart';
+import 'scanner_screen.dart';
 import '../services/downloads.dart';
 import '../services/navigation_policy.dart';
 import '../services/paystack_service.dart';
@@ -34,7 +37,7 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
   );
   final _launch = DateTime.now();
   final _scaffold = GlobalKey<ScaffoldMessengerState>();
-  StreamSubscription? _connSub, _linkSub;
+  StreamSubscription? _connSub, _linkSub, _pushSub;
   Timer? _splashMax, _stall;
   DateTime? _pausedAt, _lastBack;
 
@@ -42,6 +45,7 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
   String? _error;
   double _progress = 0;
   bool _failedLast = false;
+  bool _locked = false;
 
   String get _platform => Platform.isIOS ? 'ios' : 'android';
   String get _ua => 'SoftneticsApp/${widget.version} ($_platform)';
@@ -53,6 +57,10 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
     _splashMax = Timer(const Duration(seconds: 8), _hideSplash);
     Connectivity().checkConnectivity().then(_onConn);
     _connSub = Connectivity().onConnectivityChanged.listen(_onConn);
+    _pushSub = Push.taps.listen(_openPushUrl);
+    AppLock.enabled.then((on) {
+      if (on && mounted) _unlock(lock: true);
+    });
     _linkSub = AppLinks().uriLinkStream.listen((u) {
       final t = mapDeepLink(u);
       if (t != null) _web?.loadUrl(urlRequest: URLRequest(url: WebUri.uri(t)));
@@ -64,6 +72,7 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
     WidgetsBinding.instance.removeObserver(this);
     _connSub?.cancel();
     _linkSub?.cancel();
+    _pushSub?.cancel();
     _splashMax?.cancel();
     _stall?.cancel();
     super.dispose();
@@ -73,11 +82,27 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
   void didChangeAppLifecycleState(AppLifecycleState s) {
     if (s == AppLifecycleState.paused) {
       _pausedAt = DateTime.now();
+      AppLock.enabled.then((on) {
+        if (on && mounted) setState(() => _locked = true);
+      });
       // ponytail: Android cookie flush not exposed by the plugin; WebView persists on its own timer.
-    } else if (s == AppLifecycleState.resumed && _pausedAt != null) {
+    } else if (s == AppLifecycleState.resumed && _locked) {
+      _unlock();
+    }
+    if (s == AppLifecycleState.resumed && _pausedAt != null) {
       if (DateTime.now().difference(_pausedAt!) > const Duration(minutes: 30)) _web?.reload();
       _pausedAt = null;
     }
+  }
+
+  void _openPushUrl(String url) {
+    final t = mapDeepLink(Uri.parse(url));
+    if (t != null) _web?.loadUrl(urlRequest: URLRequest(url: WebUri.uri(t)));
+  }
+
+  Future<void> _unlock({bool lock = false}) async {
+    if (lock) setState(() => _locked = true);
+    if (await AppLock.unlock() && mounted) setState(() => _locked = false);
   }
 
   void _onConn(List<ConnectivityResult> r) {
@@ -352,6 +377,12 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
                         saveFile: (n, b) => saveBase64(context, n, b),
                       ),
                     );
+                    registerPhase2Bridge(c, () async {
+                      if (!await _ask(Permission.camera, 'camera')) return null;
+                      if (!mounted) return null;
+                      return Navigator.push<String>(
+                          context, MaterialPageRoute(builder: (_) => const ScannerScreen()));
+                    });
                   },
                   onLoadStart: (c, u) {
                     _stall?.cancel();
@@ -445,6 +476,19 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
                 ),
               ),
             if (_error != null) Positioned.fill(child: ErrorView(message: _error!, onRetry: _retry)),
+            if (_locked)
+              Positioned.fill(
+                child: ColoredBox(
+                  color: Colors.white,
+                  child: Center(
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(backgroundColor: kGreen),
+                      onPressed: _unlock,
+                      child: const Text('Unlock'),
+                    ),
+                  ),
+                ),
+              ),
             if (_splash) const Positioned.fill(child: SplashOverlay()),
           ]),
         ),

@@ -3,6 +3,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../config.dart';
+import 'app_lock.dart';
+import 'push.dart';
 
 /// Injected on every page. Pages must work when this is absent.
 const bridgeScript = r'''
@@ -15,7 +17,11 @@ const bridgeScript = r'''
     keepScreenOn: function (on) { return call('keepScreenOn', on); },
     share: function (d) { return call('share', d); },
     saveFile: function (name, mime, b64) { return call('saveFile', {name: name, mime: mime, base64: b64}); },
-    openExternal: function (u) { return call('openExternal', u); }
+    openExternal: function (u) { return call('openExternal', u); },
+    scanQr: function () { return call('scanQr'); },
+    registerPushToken: function () { return call('registerPushToken'); },
+    setAppLock: function (on) { return call('setAppLock', on); },
+    getAppLock: function () { return call('getAppLock'); }
   };
   if (!navigator.share) {
     navigator.share = function (d) { return call('share', d || {}); };
@@ -87,4 +93,18 @@ void registerBridge(InAppWebViewController c, BridgeHooks h) {
               await launchUrl(u, mode: LaunchMode.externalApplication);
             }
           }));
+}
+
+void registerPhase2Bridge(InAppWebViewController c, Future<String?> Function() scanQr) {
+  Future<dynamic> guarded(Future<dynamic> Function() f) async {
+    final u = await c.getUrl();
+    return u?.host == kHost ? f() : null;
+  }
+
+  c.addJavaScriptHandler(handlerName: 'scanQr', callback: (_) => guarded(scanQr));
+  c.addJavaScriptHandler(
+      handlerName: 'registerPushToken', callback: (_) => guarded(Push.token));
+  c.addJavaScriptHandler(
+      handlerName: 'setAppLock', callback: (a) => guarded(() => AppLock.set(a.first == true)));
+  c.addJavaScriptHandler(handlerName: 'getAppLock', callback: (_) => guarded(() => AppLock.enabled));
 }
