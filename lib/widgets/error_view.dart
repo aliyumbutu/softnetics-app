@@ -13,7 +13,7 @@ class ErrorView extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Image.asset('assets/logo.png', width: 180),
+              Image.asset('assets/logo.png', width: 120),
               const SizedBox(height: 32),
               Text(message,
                   textAlign: TextAlign.center,

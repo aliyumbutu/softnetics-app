@@ -7,10 +7,12 @@
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Softnetics uses your location to map your farm boundary and give local farming advice.</string>
 		<key>NSFaceIDUsageDescription</key>
-	<string>Softnetics uses Face ID to unlock the app.</string>
-	<key>UIBackgroundModes</key>
-	<array><string>remote-notification</string></array>
-	<key>NSCameraUsageDescription</key>
+		<string>Softnetics uses Face ID to unlock the app.</string>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+		</array>
+		<key>NSCameraUsageDescription</key>
 		<string>Softnetics uses the camera to scan animal QR tags and take farm photos.</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>Softnetics uses the microphone for calls with experts.</string>

@@ -12,6 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config.dart';
+import '../main.dart' show whiteBars;
 import '../services/app_lock.dart';
 import '../services/bridge.dart';
 import '../services/push.dart';
@@ -46,6 +47,7 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
   double _progress = 0;
   bool _failedLast = false;
   bool _locked = false;
+  bool _authPage = false;
 
   String get _platform => Platform.isIOS ? 'ios' : 'android';
   String get _ua => 'SoftneticsApp/${widget.version} ($_platform)';
@@ -123,7 +125,7 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
   void _hideSplash() {
     if (!mounted || !_splash) return;
     setState(() => _splash = false);
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    SystemChrome.setSystemUIOverlayStyle(whiteBars);
   }
 
   void _toast(String m) => _scaffold.currentState
@@ -250,29 +252,8 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
         (await SharedPreferences.getInstance()).setString('lastPath', path);
       }
       _ptr.setEnabled(!isMapPage(path));
-      _applyTheme(c);
       _applyOrientation(path);
     }
-  }
-
-  Future<void> _applyTheme(InAppWebViewController c) async {
-    final v = await c.evaluateJavascript(
-        source: "document.querySelector('meta[name=theme-color]')?.content || ''");
-    final col = _parseColor('$v');
-    if (col == null || !mounted) return;
-    final dark = col.computeLuminance() < 0.5;
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: col,
-      statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
-      statusBarBrightness: dark ? Brightness.dark : Brightness.light,
-      systemNavigationBarColor: col,
-      systemNavigationBarIconBrightness: dark ? Brightness.light : Brightness.dark,
-    ));
-  }
-
-  Color? _parseColor(String s) {
-    final m = RegExp(r'^#([0-9a-fA-F]{6})$').firstMatch(s.trim());
-    return m == null ? null : Color(0xFF000000 | int.parse(m.group(1)!, radix: 16));
   }
 
   void _applyOrientation(String path) {
@@ -392,6 +373,11 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
                     if (_error != null) setState(() => _error = null);
                   },
                   onLoadStop: _onStop,
+                  onUpdateVisitedHistory: (c, u, _) {
+                    final auth = u?.host == kHost &&
+                        (u!.path == '/login' || u.path == '/register');
+                    if (auth != _authPage && mounted) setState(() => _authPage = auth);
+                  },
                   onProgressChanged: (c, p) {
                     if (mounted) setState(() => _progress = p / 100);
                     if (p == 100) _ptr.endRefreshing();
@@ -473,6 +459,24 @@ class _WebShellScreenState extends State<WebShellScreen> with WidgetsBindingObse
                     title: const Text('Taking longer than usual'),
                     trailing: TextButton(onPressed: _retry, child: const Text('Retry')),
                   ),
+                ),
+              ),
+            if (_authPage && !_splash && _error == null)
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: 16 + MediaQuery.of(context).padding.bottom,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: kGreen,
+                    side: const BorderSide(color: kGreen),
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                  icon: const Icon(Icons.home_outlined),
+                  label: const Text('Back to home'),
+                  onPressed: () =>
+                      _web?.loadUrl(urlRequest: URLRequest(url: WebUri(kStartUrl))),
                 ),
               ),
             if (_error != null) Positioned.fill(child: ErrorView(message: _error!, onRetry: _retry)),

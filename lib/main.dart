@@ -7,14 +7,19 @@ import 'config.dart';
 import 'services/push.dart';
 import 'screens/web_shell_screen.dart';
 
+// White status + navigation bars with dark icons, everywhere.
+const whiteBars = SystemUiOverlayStyle(
+  statusBarColor: Colors.white,
+  statusBarIconBrightness: Brightness.dark,
+  statusBarBrightness: Brightness.light,
+  systemNavigationBarColor: Colors.white,
+  systemNavigationBarIconBrightness: Brightness.dark,
+);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: kGreen,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(whiteBars);
   await Push.init();
   final info = await PackageInfo.fromPlatform();
   final link = await AppLinks().getInitialLink();

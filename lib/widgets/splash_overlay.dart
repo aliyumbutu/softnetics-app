@@ -38,7 +38,7 @@ class _SplashOverlayState extends State<SplashOverlay> with SingleTickerProvider
             child: ScaleTransition(
               scale: Tween(begin: 0.92, end: 1.0).animate(curve),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Image.asset('assets/logo.png', width: 220),
+                Image.asset('assets/logo.png', width: 160),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: 120,
