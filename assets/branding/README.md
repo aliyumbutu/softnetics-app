@@ -1,42 +1,11 @@
-# SCSAP Softnetics — Flutter app icons
+# SCSAP Softnetics app icon (Flutter)
 
-Copy each folder into the root of your Flutter project (same paths), replacing existing files:
+Your logo, unchanged and centred, at every size Flutter needs.
 
-- android/app/src/main/res/  -> launcher icons for all densities + adaptive icon (Android 8+) + themed/monochrome icon (Android 13+)
-- ios/Runner/Assets.xcassets/AppIcon.appiconset/  -> all iPhone/iPad sizes + 1024 App Store icon (opaque, no alpha, as Apple requires)
-- macos/Runner/Assets.xcassets/AppIcon.appiconset/
-- web/icons/ and web/favicon.png  (maskable icons included)
-- windows/runner/resources/app_icon.ico
-- linux/app_icon.png
-- store/play_store_512.png -> Google Play Console listing icon
+1. Copy the android, ios, macos, web, windows and linux folders into your Flutter project root, replacing existing files.
+2. Delete any old android/app/src/main/res/drawable*/ic_launcher_foreground.png or ic_launcher_background.png
+   left over from a previous icon tool, so they don't clash.
+3. Run:  flutter clean && flutter run   (uninstall the old app from the phone first so the launcher refreshes the icon)
 
-Make sure android/app/src/main/AndroidManifest.xml has:  android:icon="@mipmap/ic_launcher"
-
-Then run:  flutter clean && flutter run
-
-## Alternative: generate with flutter_launcher_icons
-Copy the assets/icon/ folder, add this to pubspec.yaml, then run  dart run flutter_launcher_icons
-
-```yaml
-dev_dependencies:
-  flutter_launcher_icons: ^0.14.4
-
-flutter_launcher_icons:
-  android: "ic_launcher"
-  ios: true
-  remove_alpha_ios: true
-  image_path: "assets/icon/app_icon.png"
-  adaptive_icon_background: "assets/icon/adaptive_background.png"
-  adaptive_icon_foreground: "assets/icon/adaptive_foreground.png"
-  adaptive_icon_monochrome: "assets/icon/adaptive_monochrome.png"
-  web:
-    generate: true
-    image_path: "assets/icon/app_icon_rounded.png"
-  windows:
-    generate: true
-    image_path: "assets/icon/app_icon_rounded.png"
-    icon_size: 256
-  macos:
-    generate: true
-    image_path: "assets/icon/app_icon_rounded.png"
-```
+play_store_512.png is for the Google Play Console listing.
+assets/icon/ has the 1024px originals.
