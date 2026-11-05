@@ -2,7 +2,7 @@
 
 Code is in place; these need your accounts/files:
 
-- **Push (FCM):** create a Firebase project, add Android `ng.softnetics.app` and iOS `ng.softnetics.app`.
+- **Push (FCM):** create a Firebase project, add Android `ng.softnetics.softnetics` and iOS `ng.softnetics.app`.
   Put `google-services.json` in `android/app/` and `GoogleService-Info.plist` in `ios/Runner/` (via Xcode).
   Upload your APNs key in Firebase. Without these files the app runs and push is silently off.
   Server: `POST /api/devices` to store the token from `window.SoftneticsApp.registerPushToken()`; send pushes with `data.url`.

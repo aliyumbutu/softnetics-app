@@ -3,7 +3,7 @@
 | # | Change | Why | Priority |
 |---|--------|-----|----------|
 | 1 | App-initiated Paystack top-ups (user-agent contains `SoftneticsApp`) use `callback_url` = `/app-return/paystack`, which redirects to `softnetics://paystack/callback?reference=…`; fallback page "Payment received — return to the Softnetics app" with scheme button + wallet link. Also confirm the verify route used in `lib/config.dart` (`kPaystackVerifyPath`). | Payment returns to the app | Required |
-| 2 | Host `/.well-known/assetlinks.json` (`ng.softnetics.app`, SHA-256 of upload + Play signing keys) and `/.well-known/apple-app-site-association` | Links open the app | Required |
+| 2 | Host `/.well-known/assetlinks.json` (`ng.softnetics.softnetics`, SHA-256 of upload + Play signing keys) and `/.well-known/apple-app-site-association` | Links open the app | Required |
 | 3 | `Cache-Control`: hashed assets immutable 1 year; HTML no-cache; wallet/payment pages no-store | Fast loads, fresh balances | High |
 | 4 | `Permissions-Policy` allowing camera, microphone, geolocation for self and daily.co | Video calls + GPS | High |
 | 5 | Detect `SoftneticsApp` UA: hide "get the app" prompts, add no-select / no-tap-highlight CSS | Native feel | Medium |
